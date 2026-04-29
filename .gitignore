@@ -1,0 +1,20 @@
+# Claude
+.claude/
+
+# Data exclusions
+input_pdfs/
+output_batches/
+
+# Source exclusions
+src/evaluator/
+src/generator/
+src/vllm_server/
+src/preprocessing_pdf/chunk_filter_vllm.py
+
+# OS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
