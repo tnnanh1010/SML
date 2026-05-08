@@ -1,0 +1,99 @@
+env:
+  OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+
+steps:
+  # Stage 1: QA Generation Pipeline
+  - name: mineru
+    stage: 1
+    input_dir: ./input_pdfs
+    output_dir: ./output_batches
+    api_url: null
+    chunk_size: 2
+    backend: pipeline
+    parse_method: auto
+    language: en
+    formula_enable: false
+    table_enable: false
+    metadata_path: ./output_batches/metadata_all_batches.json
+
+  - name: parsing
+    stage: 1
+    input_dir: ./output_batches
+    mode: batches-parallel
+    min_words: 50
+    paragraph_window: 3
+    paragraph_overlap: 1
+    workers: 5
+    batch_start: 1
+    batch_end: null
+
+  - name: filtering
+    stage: 1
+    input_dir: ./output_batches
+    mode: batches
+    model: openai/gpt-oss-120b:free
+    max_concurrent: 10
+    batch_start: 1
+    batch_end: null
+
+  - name: qa_generation
+    stage: 1
+    input_dir: ./output_batches
+    mode: batches
+    model: openai/gpt-oss-120b:free
+    max_questions: 5
+    max_concurrent: 10
+    enable_reasoning: false
+    batch_start: 1
+    batch_end: null
+
+  # Stage 2: Training Pipeline
+  - name: dataset_prep
+    stage: 2
+    input_dir: ./output_batches
+    output_file: ./training_data.jsonl
+
+  - name: training
+    stage: 2
+    dataset: ./training_data.jsonl
+    output_dir: ./train_output
+    gpus: "0,1"
+    swift_args:
+      model: Qwen/Qwen3.5-4B
+      use_hf: true
+      train_type: lora
+      lora_rank: 32
+      lora_alpha: 64
+      lora_dropout: 0.05
+      target_modules: q_proj k_proj v_proj o_proj gate_proj up_proj down_proj
+      per_device_train_batch_size: 4
+      gradient_accumulation_steps: 4
+      max_length: 512
+      learning_rate: 2e-4
+      warmup_ratio: 0.05
+      num_train_epochs: 6
+      attn_impl: sdpa
+      save_strategy: steps
+      early_stop_interval: 3
+      eval_steps: 30
+      save_steps: 30
+      dataloader_num_workers: 2
+      dataset_num_proc: 8
+      load_from_cache_file: true
+      model_author: swift
+      model_name: swift-robot
+      loss_scale: default
+
+  - name: merge
+    stage: 2
+    checkpoint: ./train_output/checkpoint-last
+
+# Stage 3: Model comparison UI
+comparison:
+  model1: Qwen/Qwen3.5-4B
+  model2: tnnanh1005/Qwen3.5-4B-SML-ver2
+  device: auto
+  max_tokens: 512
+  qa_examples: ./output_batches/test.json
+  port: 7860
+  share: false
