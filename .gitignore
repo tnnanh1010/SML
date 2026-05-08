@@ -9,7 +9,18 @@ output_batches/
 src/evaluator/
 src/generator/
 src/vllm_server/
-src/preprocessing_pdf/chunk_filter_vllm.py
+src/QAgenerator/mineru/mineru_client.py
+src/QAgenerator/mineru/README.md
+src/QAgenerator/mineru/start_api.sh
+src/QAgenerator/mineru/start_router.sh
+src/QAgenerator/chunk_filter_vllm.py
+vllm/
+sml.md
+src/SLMserve/__init__.py
+src/SLMserve/comparison_results.json
+src/SLMserve/comparison_results.svg
+src/SLMserve/comparison.ipynb
+
 
 # OS
 .DS_Store
@@ -18,3 +29,5 @@ src/preprocessing_pdf/chunk_filter_vllm.py
 __pycache__/
 *.pyc
 *.pyo
+*.pytest_cache
+
