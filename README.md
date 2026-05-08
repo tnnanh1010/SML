@@ -104,8 +104,7 @@ export OPENROUTER_API_KEY=your_key_here
 
 ## Demo
 
-
-<video src="src/SLMserve/demo_comparison_video.mov" controls width="100%"></video>
+https://github.com/user-attachments/assets/78c1717e-f4ab-4741-9d8f-fb2d5e10d60a
 
 ---
 
