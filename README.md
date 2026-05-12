@@ -122,7 +122,10 @@ export OPENROUTER_API_KEY=your_key_here
 
 ## Demo
 
-https://github.com/user-attachments/assets/78c1717e-f4ab-4741-9d8f-fb2d5e10d60a
+
+
+https://github.com/user-attachments/assets/58348803-56c1-473c-bcc1-374bc2382aa5
+
 
 ---
 
