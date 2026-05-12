@@ -106,12 +106,6 @@ git clone https://github.com/ggerganov/llama.cpp ./llama.cpp
 pip install -r llama.cpp/requirements.txt
 
 pip install --upgrade transformers 
-
-```
-
-
-git clone https://github.com/ggerganov/llama.cpp ./llama.cpp
-pip install -r llama.cpp/requirements.txt
 ```
 
 ```bash
