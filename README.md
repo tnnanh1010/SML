@@ -8,7 +8,7 @@ An end-to-end pipeline for converting internal PDF documents into domain-specifi
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════════════╗
-║                            pipeline_config.yml                                  ║
+║                            pipeline_config.yml                                   ║
 ╚══════════════════════════════════════════════════════════════════════════════════╝
 
 ┌──────────────────────────────────────────────────────────────────────────────────┐
@@ -22,7 +22,7 @@ An end-to-end pipeline for converting internal PDF documents into domain-specifi
 │  │         │    │          │    │ Gate      │    │              │                │
 │  └─────────┘    └──────────┘    └───────────┘    └──────────────┘                │
 │                                                                                  │
-│  Output: Domain-specific QA Dataset                                               │
+│  Output: Domain-specific QA Dataset                                              │
 └──────────────────────────────────────────────────────────────────────────────────┘
                                        │
                                        ▼
@@ -42,20 +42,21 @@ An end-to-end pipeline for converting internal PDF documents into domain-specifi
                                        │
                                        ▼
 ┌──────────────────────────────────────────────────────────────────────────────────┐
-│ STAGE 3: SLM Serving                                         serve_slm.py        │
+│ STAGE 3: SLM Packaging & Serving                             serve_slm.py        │
 │                                                                                  │
 │  Input: Base Model + Fine-tuned SLM + Test Questions                             │
 │                                                                                  │
-│  ┌──────────────────────────────────────────────────────┐                        │
-│  │              Gradio Comparison UI                    │                        │
-│  │                                                      │                        │
-│  │   ┌────────────────┐    ┌─────────────────────┐      │                        │
-│  │   │  Base Model    │    │  Fine-tuned SLM     │      │                        │
-│  │   └────────────────┘    └─────────────────────┘      │                        │
-│  │         ▲                        ▲                   │                        │
-│  │         └────────┬───────────────┘                   │                        │
-│  │              User Question                           │                        │
-│  └──────────────────────────────────────────────────────┘                        │
+│  ┌───────────┐    ┌─────────────────────────────────────────┐                    │
+│  │  Model    │───▶│         Gradio Comparison UI            │                    │
+│  │  Packaging│    │                                         │                    │
+│  │           │    │  ┌──────────┐       ┌─────────────┐     │                    │
+│  └───────────┘    │  │Base Model│       │Fine-tuned   │     │                    │
+│                   │  │          │       │SLM          │     │                    │
+│                   │  └──────────┘       └─────────────┘     │                    │
+│                   │       ▲                    ▲             │                    │
+│                   │       └────────┬───────────┘             │                    │
+│                   │           User Question                  │                    │
+│                   └─────────────────────────────────────────┘                    │
 │                                                                                  │
 │  Output: Side-by-side Response Comparison + Ground Truth                         │
 └──────────────────────────────────────────────────────────────────────────────────┘
@@ -90,10 +91,21 @@ python run_training_pipeline.py --only dataset_prep
 ## Prerequisites
 
 ```bash
+# Core dependencies
 pip install pyyaml openai tqdm httpx gradio torch transformers
-pip install -U "mineru[all]"        # Stage 1
-pip install ms-swift                # Stage 2
-!pip install --upgrade transformers #Stage 3
+
+# Stage 1: PDF extraction
+pip install -U "mineru[all]"
+
+# Stage 2: Training
+pip install ms-swift
+
+# Stage 3: Model packaging & serving
+curl -fsSL https://ollama.com/install.sh | sh   # Linux
+git clone https://github.com/ggerganov/llama.cpp ./llama.cpp
+pip install -r llama.cpp/requirements.txt
+
+pip install --upgrade transformers 
 ```
 
 ```bash
@@ -104,7 +116,10 @@ export OPENROUTER_API_KEY=your_key_here
 
 ## Demo
 
-https://github.com/user-attachments/assets/78c1717e-f4ab-4741-9d8f-fb2d5e10d60a
+
+
+https://github.com/user-attachments/assets/58348803-56c1-473c-bcc1-374bc2382aa5
+
 
 ---
 
@@ -112,24 +127,23 @@ https://github.com/user-attachments/assets/78c1717e-f4ab-4741-9d8f-fb2d5e10d60a
 
 ```
 SML/
-├── pipeline_config.yml              # Single config for all 3 stages
-├── run_QAgen_pipeline.py            # Stage 1 runner
-├── run_training_pipeline.py         # Stage 2 runner
-├── serve_slm.py                     # Stage 3 runner (Gradio UI)
-├── input_pdfs/                      # Source PDF documents
-├── output_batches/                  # Intermediate outputs (MD, chunks, QA)
+├── pipeline_config.yml                 # Single config for all 3 stages
+├── run_QAgen_pipeline.py              # Stage 1 runner
+├── run_training_pipeline.py           # Stage 2 runner
+├── serve_slm.py                       # Stage 3 runner (Gradio UI)
+├── input_pdfs/                        # Source PDF documents
+├── output_batches/                    # Intermediate outputs (MD, chunks, QA)
 ├── src/
-│   ├── QAgenerator/                 # Stage 1: QA Generation
-│   │   ├── mineru/                  # MinerU SDK extractor
-│   │   ├── parse.py                 # Markdown chunking
+│   ├── QAgenerator/                   # Stage 1: QA Generation
+│   │   ├── mineru/                    # MinerU SDK extractor
+│   │   ├── parse.py                   # Markdown chunking
 │   │   ├── chunk_filter_openrouter.py  # LLM quality filter
-│   │   └── qa_generator.py         # QA generation
-│   ├── SMLtrainer/                  # Stage 2: Training
-│   │   ├── prepare_dataset_swift.py # QA → ms-swift format
-│   │   ├── lora_sft.sh             # LoRA SFT script
-│   │   ├── merge.sh                # Adapter merge script
+│   │   └── qa_generator.py            # QA generation
+│   ├── SMLtrainer/                    # Stage 2: Training
+│   │   ├── prepare_dataset_swift.py   # QA → ms-swift format
+│   │   ├── lora_sft.sh                # LoRA SFT script
+│   │   ├── merge.sh                   # Adapter merge script
 │   │   └── sml_training_kaggle.ipynb  # Kaggle training notebook
-│   └── SLMserve/                    # Stage 3: Serving & Comparison
-│       ├── slm_serving_kaggle.ipynb # Kaggle serving notebook
-│       └── demo_comparison_video.mov  # Demo video
+│   └── SLMserve/                      # Stage 3: Serving & Comparison
+│       ├── slm_serving_kaggle.ipynb   # Kaggle serving notebook
 ```

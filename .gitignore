@@ -5,6 +5,10 @@
 input_pdfs/
 output_batches/
 
+# Model exclusions
+gguf/
+llama.cpp/
+
 # Source exclusions
 src/evaluator/
 src/generator/
@@ -20,7 +24,7 @@ src/SLMserve/__init__.py
 src/SLMserve/comparison_results.json
 src/SLMserve/comparison_results.svg
 src/SLMserve/comparison.ipynb
-
+SML_DEMO.mp4
 
 # OS
 .DS_Store
