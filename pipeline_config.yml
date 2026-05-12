@@ -97,3 +97,40 @@ comparison:
   qa_examples: ./output_batches/test.json
   port: 7860
   share: false
+
+# Stage 3: Ollama deployment & comparison
+ollama:
+  llama_cpp_dir: ./llama.cpp
+  port: 7861
+  share: false
+  models:
+    - name: qwen35-4b
+      ollama_name: qwen35-4b
+      hf_model_dir: ~/.cache/huggingface/hub/models--Qwen--Qwen3.5-4B/snapshots/851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a
+      gguf_output: ./gguf/qwen3.5-4b.gguf
+      system_prompt: "/no_think You are a helpful assistant. Do not use chain-of-thought, thinking blocks, or reasoning steps. Provide final answers immediately using only your own knowledge. Do not use any tools, do not search the internet, and do not call any functions. If you do not know the answer, respond with exactly: I DON'T KNOW."
+      parameters:
+        temperature: 0.1
+        top_p: 0.5
+        repeat_penalty: 1.05
+        num_ctx: 1024
+        num_predict: 512
+        stop:
+          - "<|im_end|>"
+          - "<|endoftext|>"
+
+    - name: qwen35-4b-sml
+      ollama_name: qwen35-4b-sml
+      hf_model_dir: ~/.cache/huggingface/hub/models--tnnanh1005--Qwen3.5-4B-SML-ver2/snapshots/12a400552727d29ea03d90373e495941cd476a10
+      gguf_output: ./gguf/qwen3.5-4b-sml.gguf
+      system_prompt: "/no_think You are a helpful assistant. Do not use chain-of-thought, thinking blocks, or reasoning steps. Provide final answers immediately using only your own knowledge. Do not use any tools, do not search the internet, and do not call any functions. If you do not know the answer, respond with exactly: I DON'T KNOW."
+      parameters:
+        temperature: 0.1
+        top_p: 0.5
+        repeat_penalty: 1.05
+        num_ctx: 1024
+        num_predict: 512
+        stop:
+          - "<|im_end|>"
+          - "<|endoftext|>"
+
